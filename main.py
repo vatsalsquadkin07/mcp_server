@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from mcp_classifier import mcp_classifier
 import uvicorn
 import logging
+import subprocess
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Model Context Protocol (MCP) Server",
     description="Detects destructiveness of CLI/shell commands using N-gram + TF-IDF",
-    version="1.0.0"
+    version="2.0.0"
 )
 
 # ============================================================================
@@ -36,6 +37,8 @@ class CommandResponse(BaseModel):
     confidence: float
     is_valid: bool
     reason: str
+    confirmation_required: bool = False
+    message: str | None = None
     
     class Config:
         example = {
@@ -43,7 +46,9 @@ class CommandResponse(BaseModel):
             "risk": "HIGH",
             "confidence": 0.92,
             "is_valid": True,
-            "reason": "Valid command - risk analyzed"
+            "reason": "Valid command - risk analyzed",
+            "confirmation_required": True,
+            "message": "⚠️ HIGH RISK COMMAND DETECTED. Confirm before proceeding."
         }
 
 
@@ -53,6 +58,35 @@ class BatchCommandRequest(BaseModel):
     
     class Config:
         example = {"commands": ["ls", "rm -rf /", "hello world"]}
+
+
+class ConfirmationRequest(BaseModel):
+    command: str
+    confirm: bool
+
+# ===============
+# SUBPROCESS CODE
+# ===============
+
+def execute_command(command: str):
+    try:
+        result = subprocess.run(
+            command,
+            shell=True,
+            capture_output=True,
+            text=True
+        )
+        
+
+        return {
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+            "return_code": result.returncode
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+        
 
 
 # ============================================================================
@@ -82,7 +116,7 @@ async def root():
         "version": "2.0.0"
     }
 
- 
+
 @app.get("/health", tags=["Health"])
 async def health_check():
     """Health check endpoint."""
@@ -100,6 +134,24 @@ async def list_mcp_tools():
     logger.info("Fetching MCP tools list")
     return MCP_TOOLS
 
+@app.post("/mcp/tools/confirm_execution", tags=["MCP Tools"])
+async def confirm_execution(request: ConfirmationRequest):
+
+    if not request.confirm:
+        return {
+            "status": "cancelled",
+            "message": f"Execution of '{request.command}' cancelled by user"
+        }
+
+    logger.info(f"Executing command: {request.command}")
+
+    execution_result = execute_command(request.command)
+
+    return {
+        "status": "executed",
+        "command": request.command,
+        "output": execution_result
+    }
 
 @app.post(
     "/mcp/tools/detect_destructive_command",
@@ -142,6 +194,14 @@ async def detect_destructive_command(request: CommandRequest):
         result = mcp_classifier.predict(command)
         
         logger.info(f"Prediction: risk={result['risk']}, valid={result['is_valid']}")
+
+        # If HIGH risk, require confirmation
+        if result["risk"] == "HIGH":
+            return CommandResponse(
+                **result,
+                confirmation_required=True,
+                message="⚠️ HIGH RISK COMMAND DETECTED. Confirm before proceeding."
+            )
         
         return CommandResponse(**result)
     

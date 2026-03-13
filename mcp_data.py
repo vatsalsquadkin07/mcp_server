@@ -191,6 +191,171 @@ TRAINING_COMMANDS = [
     ("mkfs /dev/sda1", "HIGH"),
     ("mkfs.ext4 /dev/sda", "HIGH"),
     ("dd if=/dev/zero of=/dev/sda", "HIGH"),
+
+    ("ls /etc", "SAFE"),
+("ls /var/log", "SAFE"),
+("cat /etc/passwd", "SAFE"),
+("cat /var/log/syslog", "SAFE"),
+("grep error /var/log/syslog", "SAFE"),
+("grep root /etc/passwd", "SAFE"),
+("find . -name '*.py'", "SAFE"),
+("find /var -type f", "SAFE"),
+("du -sh /home", "SAFE"),
+("df -h", "SAFE"),
+("whoami", "SAFE"),
+("who", "SAFE"),
+("uptime", "SAFE"),
+("top", "SAFE"),
+("ps aux", "SAFE"),
+
+# SQL SAFE
+("SELECT NOW();", "SAFE"),
+("SELECT version();", "SAFE"),
+("SELECT id,name FROM customers;", "SAFE"),
+("SELECT * FROM logs LIMIT 10;", "SAFE"),
+("SELECT COUNT(*) FROM orders;", "SAFE"),
+
+# Git SAFE
+("git show", "SAFE"),
+("git remote -v", "SAFE"),
+("git branch", "SAFE"),
+("git stash list", "SAFE"),
+
+# Docker SAFE
+("docker stats", "SAFE"),
+("docker network ls", "SAFE"),
+("docker volume ls", "SAFE"),
+
+# Kubernetes SAFE
+("kubectl get services", "SAFE"),
+("kubectl get namespaces", "SAFE"),
+("kubectl cluster-info", "SAFE"),
+
+# Cloud SAFE
+("aws ec2 describe-security-groups", "SAFE"),
+("aws iam list-roles", "SAFE"),
+("gcloud config list", "SAFE"),
+
+# ================= LOW =================
+
+("mkdir new_project", "LOW"),
+("mkdir logs", "LOW"),
+("touch index.js", "LOW"),
+("touch config.yaml", "LOW"),
+("cp config.json config.backup", "LOW"),
+("cp -r templates backup_templates", "LOW"),
+("ln -s /usr/bin/python python_link", "LOW"),
+("systemctl reload nginx", "LOW"),
+("service apache2 restart", "LOW"),
+
+# Docker LOW
+("docker run ubuntu", "LOW"),
+("docker run -it ubuntu bash", "LOW"),
+("docker tag image latest", "LOW"),
+
+# Kubernetes LOW
+("kubectl apply -f deployment.yaml", "LOW"),
+("kubectl rollout restart deployment app", "LOW"),
+("kubectl set env deployment/app DEBUG=true", "LOW"),
+
+# Terraform LOW
+("terraform init", "LOW"),
+("terraform workspace list", "LOW"),
+
+# Git LOW
+("git add .", "LOW"),
+("git commit -m 'update'", "LOW"),
+("git checkout -b feature", "LOW"),
+
+# Package manager LOW
+("npm run build", "LOW"),
+("npm run start", "LOW"),
+("pip install flask", "LOW"),
+("pip install pandas", "LOW"),
+
+# ================= MEDIUM =================
+
+("rm temp.txt", "MEDIUM"),
+("rm logs.log", "MEDIUM"),
+("rm -r cache", "MEDIUM"),
+("rm -r build", "MEDIUM"),
+("rm -r node_modules", "MEDIUM"),
+
+("mv config.old config.new", "MEDIUM"),
+("mv backup.tar.gz archive/", "MEDIUM"),
+
+("chmod 700 secret.txt", "MEDIUM"),
+("chmod -R 755 public_html", "MEDIUM"),
+
+("chown root:root file", "MEDIUM"),
+
+# SQL MEDIUM
+("DELETE FROM logs WHERE id=10;", "MEDIUM"),
+("DELETE FROM sessions WHERE expired=1;", "MEDIUM"),
+("UPDATE accounts SET balance=0;", "MEDIUM"),
+("UPDATE users SET role='admin' WHERE id=1;", "MEDIUM"),
+
+("DROP INDEX idx_users", "MEDIUM"),
+("ALTER TABLE products ADD COLUMN price INT;", "MEDIUM"),
+
+# Docker MEDIUM
+("docker stop my_container", "MEDIUM"),
+("docker rm old_container", "MEDIUM"),
+("docker image rm old_image", "MEDIUM"),
+
+# Kubernetes MEDIUM
+("kubectl delete service my-service", "MEDIUM"),
+("kubectl delete configmap app-config", "MEDIUM"),
+
+# Git MEDIUM
+("git revert HEAD", "MEDIUM"),
+("git reset HEAD~1", "MEDIUM"),
+
+# ================= HIGH =================
+
+("rm -rf /*", "HIGH"),
+("rm -rf /tmp/*", "HIGH"),
+("rm -rf $HOME", "HIGH"),
+("rm -rf /var/log", "HIGH"),
+
+# SQL HIGH
+("DROP DATABASE users", "HIGH"),
+("DROP DATABASE staging", "HIGH"),
+("DROP TABLE orders", "HIGH"),
+("DROP TABLE payments", "HIGH"),
+("TRUNCATE TABLE sessions", "HIGH"),
+("TRUNCATE TABLE transactions", "HIGH"),
+
+("DELETE FROM users", "HIGH"),
+("DELETE FROM orders", "HIGH"),
+
+# Docker HIGH
+("docker container prune -f", "HIGH"),
+("docker volume prune -f", "HIGH"),
+("docker system prune --volumes", "HIGH"),
+
+# Kubernetes HIGH
+("kubectl delete deployment --all", "HIGH"),
+("kubectl delete pods --all", "HIGH"),
+("kubectl delete services --all", "HIGH"),
+
+# Terraform HIGH
+("terraform destroy -auto-approve", "HIGH"),
+
+# AWS HIGH
+("aws ec2 terminate-instances --instance-ids i-123", "HIGH"),
+("aws rds delete-db-instance prod-db", "HIGH"),
+("aws s3 rb s3://prod-bucket --force", "HIGH"),
+
+# GCP HIGH
+("gcloud compute instances delete --all", "HIGH"),
+("gcloud sql instances delete prod-db", "HIGH"),
+
+# Filesystem destruction
+("mkfs.ext4 /dev/sdb", "HIGH"),
+("mkfs /dev/sdb1", "HIGH"),
+("dd if=/dev/zero of=/dev/sdb", "HIGH"),
+
 ]
 
 LABELS = ["SAFE", "LOW", "MEDIUM", "HIGH"]

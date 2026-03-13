@@ -58,14 +58,27 @@ class MCPClassifier:
         'nmap', 'ping', 'traceroute', 'netstat', 'ifconfig', 'ip',
         'iptables', 'ufw', 'firewall-cmd', 'vi', 'vim', 'nano', 'emacs',
         'less', 'more', 'watch', 'screen', 'tmux', 'cron', 'at',
-        'df', 'du', 'free', 'uptime', 'who', 'whoami', 'hostname',
+        'df', 'du', 'free', 'uptime', 'who', 'whoami', 'hostname','vite',
+        'webpack', 'tsc'
+
+        # networking
+        'curl', 'wget', 'dig', 'nslookup'
+
+        # linux tools
+        'journalctl', 'mount', 'umount',
+        'lsblk', 'blkid', 'fdisk',
+
+        # CI/CD tools
+        'ansible', 'ansible-playbook', 'helmfile',
     }
     
     # SQL keywords
     SQL_KEYWORDS = {
         'select', 'insert', 'update', 'delete', 'drop', 'create', 'alter',
         'truncate', 'grant', 'revoke', 'from', 'where', 'join', 'union',
-        'order', 'group', 'having', 'limit', 'offset', 'partition',
+        'order', 'group', 'having', 'limit', 'offset', 'partition','table', 
+        'database', 'index', 'view', 'constraint', 'schema', 'cascade', 'replace',
+        'distinct', 'exists'
     }
     
     # Flags/options patterns (things that look like command options)
@@ -86,11 +99,11 @@ class MCPClassifier:
         # Initialize TF-IDF vectorizer with N-gram support (1-3 grams)
         self.vectorizer = TfidfVectorizer(
             analyzer="word",
-            ngram_range=(1, 3),  # Unigrams, bigrams, trigrams
-            token_pattern=r"[a-zA-Z0-9_\-./]+",  # CLI-specific tokens
+            ngram_range=(1, 4),  # Unigrams, bigrams, trigrams
+            token_pattern=r"[a-zA-Z0-9_\-./*;]+", # CLI-specific tokens
             lowercase=True,
             stop_words=None,
-            max_features=1000,
+            max_features=5000,
             min_df=1
         )
         
@@ -99,7 +112,7 @@ class MCPClassifier:
             max_iter=300,
             class_weight='balanced',
             random_state=42,
-            C=0.5
+            C=1.5
         )
         
         # Train the model
@@ -155,7 +168,7 @@ class MCPClassifier:
         
         # Check if it looks like SQL
         tokens = command.split()
-        if tokens and tokens[0].upper() in self.SQL_KEYWORDS:
+        if tokens and tokens[0].lower() in self.SQL_KEYWORDS:
             return True, "Valid SQL command"
         
         # Check if it matches common option patterns (indicates it's part of a command)
@@ -174,6 +187,9 @@ class MCPClassifier:
         if len(tokens) >= 2:
             if command_base in ['git', 'kubectl', 'docker', 'aws', 'gcloud', 'terraform']:
                 return True, "Valid multi-word command"
+            
+        if command.startswith("sudo "):
+            command = command[5:]
         
         # If none of the above, it's likely random text
         return False, "Does not appear to be a valid CLI command"
@@ -204,6 +220,8 @@ class MCPClassifier:
         """
         original_command = command
         command = command.strip()
+        command = command.lower()
+        command = command.replace(";", "")
         
         # Validate if it's a real command
         is_valid, reason = self.is_valid_command(command)
