@@ -5,6 +5,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from mcp_classifier import mcp_classifier
+from risk_fusion import analyze_command
 import uvicorn
 import logging
 import subprocess
@@ -153,11 +154,7 @@ async def confirm_execution(request: ConfirmationRequest):
         "output": execution_result
     }
 
-@app.post(
-    "/mcp/tools/detect_destructive_command",
-    response_model=CommandResponse,
-    tags=["MCP Tools"]
-)
+@app.post("/mcp/tools/detect_destructive_command", response_model=CommandResponse, tags=["MCP Tools"])
 async def detect_destructive_command(request: CommandRequest):
     """
     Detect the destructiveness risk of a CLI command.
@@ -191,17 +188,18 @@ async def detect_destructive_command(request: CommandRequest):
         logger.info(f"Analyzing command: {command}")
         
         # Predict with validation
-        result = mcp_classifier.predict(command)
+        result = analyze_command(command)
         
         logger.info(f"Prediction: risk={result['risk']}, valid={result['is_valid']}")
 
         # If HIGH risk, require confirmation
-        if result["risk"] == "HIGH":
-            return CommandResponse(
-                **result,
-                confirmation_required=True,
-                message="⚠️ HIGH RISK COMMAND DETECTED. Confirm before proceeding."
-            )
+        is_high_risk = result.get("risk") == "HIGH"
+    
+        return CommandResponse(
+            **result,
+            confirmation_required=is_high_risk,
+            message="⚠️ HIGH RISK" if is_high_risk else "Command analyzed"
+        )
         
         return CommandResponse(**result)
     

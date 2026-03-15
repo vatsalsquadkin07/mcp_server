@@ -58,11 +58,12 @@ class MCPClassifier:
         'nmap', 'ping', 'traceroute', 'netstat', 'ifconfig', 'ip',
         'iptables', 'ufw', 'firewall-cmd', 'vi', 'vim', 'nano', 'emacs',
         'less', 'more', 'watch', 'screen', 'tmux', 'cron', 'at',
-        'df', 'du', 'free', 'uptime', 'who', 'whoami', 'hostname','vite',
-        'webpack', 'tsc'
+        'df', 'du', 'free', 'uptime', 'who', 'whoami', 
+        'hostname','vite',
+        'webpack', 'tsc',
 
         # networking
-        'curl', 'wget', 'dig', 'nslookup'
+        'curl', 'wget', 'dig', 'nslookup',
 
         # linux tools
         'journalctl', 'mount', 'umount',
@@ -99,8 +100,8 @@ class MCPClassifier:
         # Initialize TF-IDF vectorizer with N-gram support (1-3 grams)
         self.vectorizer = TfidfVectorizer(
             analyzer="word",
-            ngram_range=(1, 4),  # Unigrams, bigrams, trigrams
-            token_pattern=r"[a-zA-Z0-9_\-./*;]+", # CLI-specific tokens
+            ngram_range=(1, 10),  # Unigrams, bigrams, trigrams
+            token_pattern=r"[a-zA-Z0-9_\-./*;(){}\[\]]+", # tokens
             lowercase=True,
             stop_words=None,
             max_features=5000,
