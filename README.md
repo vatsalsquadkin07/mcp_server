@@ -25,3 +25,4 @@ pip install fastapi fastmcp uvicorn scikit-learn pydantic
 # Or using uv (optional, faster):
 uv pip install fastapi fastmcp uvicorn scikit-learn pydantic# mcp_server
 # command_detector
+# mcp_server_ai
