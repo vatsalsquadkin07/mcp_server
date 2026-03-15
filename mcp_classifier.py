@@ -71,6 +71,13 @@ class MCPClassifier:
 
         # CI/CD tools
         'ansible', 'ansible-playbook', 'helmfile',
+
+        # MongoDB shell
+        'db', 'mongo', 'mongosh', 'mongodump', 'mongorestore', 'mongoimport',
+        'mongoexport',
+
+        # Other shells / interpreters invoked directly
+        'bash', 'sh', 'zsh', 'fish', 'pwsh', 'powershell', 'cmd',
     }
     
     # SQL keywords
